@@ -9,30 +9,24 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git 'https://github.com/nishajain0708/devopsexp'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
-                bat 'docker build -t %IMAGE_NAME% .'
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Run Container') {
             steps {
-                bat '''
-                docker rm -f %CONTAINER_NAME% 2>nul || exit 0
-                docker run -d -p %PORT%:80 --name %CONTAINER_NAME% %IMAGE_NAME%
+                sh '''
+                docker rm -f $CONTAINER_NAME || true
+                docker run -d -p $PORT:80 --name $CONTAINER_NAME $IMAGE_NAME
                 '''
             }
         }
 
         stage('Terraform Init') {
             steps {
-                bat '''
+                sh '''
                 cd terraform
                 terraform init
                 '''
@@ -41,7 +35,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                bat '''
+                sh '''
                 cd terraform
                 terraform apply -auto-approve
                 '''
