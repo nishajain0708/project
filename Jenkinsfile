@@ -13,7 +13,7 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/nishajain0708/devops-website.git'
+                git branch: 'main', url: 'https://github.com/nishajain0708/project.git'
             }
         }
 
