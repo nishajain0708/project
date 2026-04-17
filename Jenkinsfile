@@ -13,48 +13,48 @@ pipeline {
 
         stage('Clone Code') {
             steps {
-                git branch: 'main', url: 'https://github.com/nishajain0708/project.git'
+                git 'https://github.com/nishajain0708/project.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                bat 'docker build -t %IMAGE_NAME% .'
             }
         }
 
         stage('Tag Image') {
             steps {
-                sh 'docker tag $IMAGE_NAME $DOCKERHUB_IMAGE'
+                bat 'docker tag %IMAGE_NAME% %DOCKERHUB_IMAGE%'
             }
         }
 
         stage('Docker Login') {
             steps {
                 withCredentials([string(credentialsId: 'docker-pass', variable: 'PASS')]) {
-                    sh 'docker login -u YOUR_DOCKERHUB_USERNAME -p $PASS'
+                    bat 'docker login -u nishajain0708 -p %PASS%'
                 }
             }
         }
 
         stage('Push to Docker Hub') {
             steps {
-                sh 'docker push $DOCKERHUB_IMAGE'
+                bat 'docker push %DOCKERHUB_IMAGE%'
             }
         }
 
         stage('Run Local Container (Optional)') {
             steps {
-                sh '''
-                docker rm -f $CONTAINER_NAME || true
-                docker run -d -p $PORT:80 --name $CONTAINER_NAME $IMAGE_NAME
+                bat '''
+                docker rm -f %CONTAINER_NAME% || exit 0
+                docker run -d -p %PORT%:80 --name %CONTAINER_NAME% %IMAGE_NAME%
                 '''
             }
         }
 
         stage('Terraform Init') {
             steps {
-                sh '''
+                bat '''
                 cd terraform
                 terraform init
                 '''
@@ -63,7 +63,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                sh '''
+                bat '''
                 cd terraform
                 terraform apply -auto-approve
                 '''
@@ -73,7 +73,7 @@ pipeline {
         stage('Get Public URL') {
             steps {
                 script {
-                    def ip = sh(script: "cd terraform && terraform output -raw public_ip", returnStdout: true).trim()
+                    def ip = bat(script: "cd terraform && terraform output -raw public_ip", returnStdout: true).trim()
                     echo "🌐 LIVE APP URL: http://${ip}"
                 }
             }
